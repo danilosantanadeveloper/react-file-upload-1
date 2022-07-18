@@ -5,6 +5,8 @@ import axios from 'axios';
 
 const FileUpload = () => {
   const [file, setFile] = useState('');
+  const [columnIndex, setColumnIndex] = useState('');
+  const [fileClass, setfileClass] = useState('file-hide');
   const [filename, setFilename] = useState('Choose File');
   const [uploadedFile, setUploadedFile] = useState({});
   const [message, setMessage] = useState('');
@@ -15,28 +17,51 @@ const FileUpload = () => {
     setFilename(e.target.files[0].name);
   };
 
+  const onChangeIndex = e => {
+    setColumnIndex(e.target.value);
+  }
+
+
   const onSubmit = async e => {
+    
     e.preventDefault();
+
+    if(file == null) {
+      alert('Please choose a file.');
+      return;
+    } else if(columnIndex == '') {
+      alert('Please enter columnIndex.');
+      return;
+    }
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('columnIndex', columnIndex);
 
     try {
+      
       const res = await axios.post('/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
         onUploadProgress: progressEvent => {
           setUploadPercentage(parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total)));
-          setTimeout(() => setUploadPercentage(0), 10000);
-        }
+          if (parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total)) > 98);
+          setfileClass('file-show');
+        },
       });
-
-      const { fileName, filePath } = res.data;
+      
+      setfileClass('file-hide');
+      setTimeout(() => setUploadPercentage(0), 500);
+      const { fileName, filePath, data } = res.data;
+      console.log(data);
       setUploadedFile({ fileName, filePath });
       setMessage('File uploaded');
+      window.location = `http://localhost:5000/files/${fileName}`;
+      return;
+
     } catch(err) {
       if(err.response.status === 500) {
-        setMessage('There was a problem witht he server');
+        setMessage('There was a problem with the server');
       } else {
         setMessage(err.response.data.msg);
       }
@@ -47,6 +72,7 @@ const FileUpload = () => {
     <Fragment>
       { message ? <Message msg={ message } /> : null }
       <form onSubmit={onSubmit}>
+
         <div className="custom-file mb-4">
           <input
             type="file"
@@ -59,19 +85,24 @@ const FileUpload = () => {
           </label>
         </div>
 
-        <Progress percentage={ uploadPercentage } />
+        <div className='custom-file mb-4'>
+          <input  
+            type="number"
+            className="custom-column-index-number"
+            id="customeIndex"
+            placeholder='Column Index'
+            min="1"
+            onChange={onChangeIndex} />
+        </div>
 
-        <input
+        <Progress percentage={ uploadPercentage } />
+        <h6 className={fileClass}> Operating ... </h6>
+        <input 
           type="submit"
-          value="Upload"
+          value="Submit"
           className="btn btn-primary btn-block mt-4"
         />
       </form>
-      { uploadedFile ? <div className="row mt-5">
-        <div className="col-md-6 m-auto"></div>
-          <h3 classNAme="text-center">{ uploadedFile.fileName }</h3>
-          <img style={{ width: '100%' }} src={uploadedFile.filePath} alt="" />
-        </div> : null }
     </Fragment>
   );
 };

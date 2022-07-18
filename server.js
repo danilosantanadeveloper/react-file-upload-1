@@ -1,26 +1,55 @@
 const express = require("express");
 const fileUpload = require("express-fileupload");
+const uploadController = require('./controllers/uploadController');
+const downloadController = require('./controllers/downloadController');
+const mongoose = require('mongoose');
+const multer = require('multer');
+
+const storage = multer.diskStorage({ //multers disk storage settings
+  destination: function (req, file, cb) {
+      cb(null, './client/public/uploads/')
+  },
+  filename: function (req, file, cb) {
+      const datetimestamp = Date.now();
+      cb(null, file.fieldname)
+  }
+});
+
+const upload = multer({ //multer settings
+  storage: storage,
+  fileFilter: function (req, file, callback) {
+      const ext = path.extname(file.originalname);
+      if(ext !== '.csv') {
+          return callback(new Error('Only allowed CSV'))
+      }
+      callback(null, true)
+  }
+}).single('file');
+
+const connectDB = async () => {
+  try {
+    mongoose.connect('mongodb://localhost:27017/usersdb');
+    const connection = mongoose.connection;
+    connection.once('open', () => {
+      console.log("MongoDB database connection established successfully");
+    });
+  } catch (err) {
+    console.error(err.message);
+    // Exit process with failure
+    process.exit(1);
+  }
+};
+
+connectDB();
 
 const app = express();
 
-app.use(fileUpload());
 
 // Upload endpoint
-app.post("/upload", (req, res) => {
-  if (req.files === null) {
-    return res.status(400).json({ msg: "No file was uploaded" });
-  }
+// app.post("/upload", upload, uploadController);
+app.use(fileUpload());
 
-  const file = req.files.file;
-
-  file.mv(`${__dirname}/client/public/uploads/${file.name}`, (err) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send(err);
-    }
-
-    res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
-  });
-});
+app.post("/upload", uploadController);
+app.get("/files/:filename", downloadController);
 
 app.listen(5000, () => console.log("Server started..."));
