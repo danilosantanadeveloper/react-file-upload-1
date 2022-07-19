@@ -16,12 +16,12 @@ module.exports = (req, res) => {
     const rootDir = path.dirname(require.main.filename);
     const realFileName = `${rootDir}/client/public/uploads/${file.name}`;
 
-    file.mv(`${realFileName}`, (err) => {
+    // file.mv(`${realFileName}`, (err) => {
       
-        if (err) { 
-            console.error(err);
-            return res.status(500).send(err);
-        }      
+        // if (err) { 
+            // console.error(err);
+            // return res.status(500).send(err);
+        // }      
 
         let data = fs.readFileSync(`${realFileName}`)
             .toString()
@@ -76,5 +76,5 @@ module.exports = (req, res) => {
         });
 
 
-    });
+    // });
 } 

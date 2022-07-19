@@ -6,13 +6,13 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 
 const storage = multer.diskStorage({ //multers disk storage settings
-  destination: function (req, file, cb) {
-      cb(null, './client/public/uploads/')
-  },
-  filename: function (req, file, cb) {
-      const datetimestamp = Date.now();
-      cb(null, file.fieldname)
-  }
+    destination: function (req, file, cb) {
+        cb(null, './client/public/uploads/')
+    },
+    filename: function (req, file, cb) {
+        const datetimestamp = Date.now();
+        cb(null, file.fieldname)
+    }
 });
 
 const upload = multer({ //multer settings
@@ -46,10 +46,10 @@ const app = express();
 
 
 // Upload endpoint
-// app.post("/upload", upload, uploadController);
+app.post("/upload", upload, uploadController);
 app.use(fileUpload());
 
-app.post("/upload", uploadController);
+// app.post("/upload", uploadController);
 app.get("/files/:filename", downloadController);
 
 app.listen(5000, () => console.log("Server started..."));
