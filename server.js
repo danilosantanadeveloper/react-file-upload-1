@@ -5,6 +5,37 @@ const downloadController = require('./controllers/downloadController');
 const mongoose = require('mongoose');
 const multer = require('multer');
 
+
+//read big txt file //
+// var LineByLineReader = require('line-by-line'),
+
+//     lr = new LineByLineReader('source.txt');
+
+// lr.on('error', function (err) {
+// 	// 'err' contains error object
+// });
+
+// lr.on('line', function (line) {
+// 	// pause emitting of lines...
+// 	lr.pause();
+
+// 	// ...do your asynchronous line processing..
+// 	setTimeout(function () {
+
+// 		// ...and continue emitting lines.
+// 		lr.resume();
+// 	}, 100);
+// });
+
+// lr.on('end', function () {
+// 	// All lines are read, file is closed now.
+// });
+
+//Initialize with Stream:
+// var LineByLineReader = require('line-by-line'),
+    // lr = new LineByLineReader(S3.getObject({ Bucket, Key }).createReadStream());
+
+
 const storage = multer.diskStorage({ //multers disk storage settings
     destination: function (req, file, cb) {
         cb(null, './client/public/uploads/')
